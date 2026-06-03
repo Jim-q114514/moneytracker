@@ -46,6 +46,11 @@ yarn-error.*
 .agents/
 skills-lock.json
 
+# 证书（不提交到 Git）
+*.p12
+*.mobileprovision
+credentials.json
+
 # 杂项
 Untitled
 "README - 副本.txt"

@@ -3,27 +3,51 @@
     "name": "MoneyTracker",
     "slug": "moneytracker",
     "version": "1.0.0",
-    "orientation": "default",
+    "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "moneytracker",
-    "schemes": ["moneytracker"],
+    "schemes": [
+      "moneytracker"
+    ],
     "splash": {
-      "backgroundColor": "#F2F2F7"
+      "backgroundColor": "#F2F2F7",
+      "dark": {
+        "backgroundColor": "#000000"
+      }
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.moneytracker"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "backgroundColor": "#F2F2F7"
-      },
-      "package": "com.yourcompany.moneytracker"
+      "bundleIdentifier": "com.jim.moneytracker",
+      "infoPlist": {
+        "CFBundleDisplayName": "MoneyTracker",
+        "CFBundleShortVersionString": "1.0.0",
+        "CFBundleVersion": "1",
+        "LSApplicationQueriesSchemes": [
+          "moneytracker"
+        ],
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        },
+        "UISupportedInterfaceOrientations": [
+          "UIInterfaceOrientationPortrait"
+        ],
+        "UIUserInterfaceStyle": "Automatic",
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "MoneyTracker 不会使用相机。",
+        "NSPhotoLibraryUsageDescription": "MoneyTracker 不会使用相册。"
+      }
     },
     "plugins": [
       "expo-document-picker"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b0ff2f80-08d4-4830-8024-1e856577a2c6"
+      }
+    }
   }
 }
