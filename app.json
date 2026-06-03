@@ -7,9 +7,6 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "scheme": "moneytracker",
-    "schemes": [
-      "moneytracker"
-    ],
     "splash": {
       "backgroundColor": "#F2F2F7",
       "dark": {
@@ -21,7 +18,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.jim.moneytracker",
+      "bundleIdentifier": "com.aramco.cycomm",
       "infoPlist": {
         "CFBundleDisplayName": "MoneyTracker",
         "CFBundleShortVersionString": "1.0.0",
