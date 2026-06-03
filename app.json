@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "MoneyTracker",
+    "slug": "moneytracker",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "moneytracker",
+    "schemes": ["moneytracker"],
+    "splash": {
+      "backgroundColor": "#F2F2F7"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.moneytracker"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F2F2F7"
+      },
+      "package": "com.yourcompany.moneytracker"
+    },
+    "plugins": [
+      "expo-document-picker"
+    ]
+  }
+}
