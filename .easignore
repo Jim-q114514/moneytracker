@@ -1,0 +1,54 @@
+# 依赖
+node_modules/
+.expo/
+*.jks
+*.p8
+*.key
+*.orig.*
+
+# 构建产物
+web-build/
+dist/
+android/
+ios/
+
+# 环境变量
+.env
+.env.local
+.env.production
+
+# macOS
+.DS_Store
+*.pem
+
+# IDE
+.vscode/
+.idea/
+
+# 调试
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# 临时文件
+*.tmp
+*.temp
+
+# Metro
+.metro-health-check-*
+
+# TypeScript
+*.tsbuildinfo
+
+# Claude Code 内部文件
+.agents/
+skills-lock.json
+
+# 杂项
+Untitled
+"README - 副本.txt"
+
+# 注意：以下证书文件故意不忽略，因为 EAS 云端构建需要它们
+# *.p12
+# *.mobileprovision
+# credentials.json
