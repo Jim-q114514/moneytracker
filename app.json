@@ -16,6 +16,9 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "android": {
+      "package": "com.aramco.cycomm"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aramco.cycomm",

@@ -5,7 +5,7 @@
  * 导入：解析 JSON 文件，基于唯一编号去重后写入数据库
  */
 
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 import { Transaction, ImportResult } from '../types';
 import { getAllTransactions, addTransaction, transactionExists } from '../database/database';

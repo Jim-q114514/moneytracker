@@ -178,7 +178,7 @@ export function parseCSV(csvText: string): CSVParsedResult {
   const result = Papa.parse(cleanText, {
     header: true,
     skipEmptyLines: true,
-    encoding: 'UTF-8',
+    worker: false,
   });
 
   if (result.errors.length > 0 && result.data.length === 0) {

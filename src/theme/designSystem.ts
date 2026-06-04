@@ -93,7 +93,7 @@ export const DarkColors = {
 } as const;
 
 /** 获取当前模式下的语义色 */
-export type SemanticColors = typeof LightColors;
+export type SemanticColors = typeof LightColors | typeof DarkColors;
 
 /**
  * 根据深色/浅色模式返回语义色对象
