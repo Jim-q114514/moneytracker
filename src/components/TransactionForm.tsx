@@ -9,7 +9,7 @@
  * - 所有按钮/芯片按下缩放反馈
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -35,6 +35,7 @@ import {
 } from '../types';
 import { createGlassStyles } from '../theme/glassStyles';
 import { getSemanticColors } from '../theme/designSystem';
+import GlassView from './GlassView';
 
 interface Props {
   visible: boolean;
@@ -113,7 +114,7 @@ export default function TransactionForm({
   const [merchant, setMerchant] = useState('');
   const [note, setNote] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('微信');
-  const [dateTime] = useState(new Date());
+  const [dateTime, setDateTime] = useState(new Date());
 
   // ---- 初始化数据 ----
   useEffect(() => {
@@ -124,15 +125,18 @@ export default function TransactionForm({
       setMerchant(editTransaction.merchant === '手动' ? '' : editTransaction.merchant);
       setNote(editTransaction.note);
       setPaymentMethod(editTransaction.payment_method as PaymentMethod);
+      setDateTime(new Date(editTransaction.transaction_date));
     } else if (prefilledData) {
       if (prefilledData.type) setType(prefilledData.type);
       if (prefilledData.amount) setAmount(String(prefilledData.amount));
       if (prefilledData.merchant) setMerchant(prefilledData.merchant);
       if (prefilledData.note) setNote(prefilledData.note);
       if (prefilledData.payment_method) setPaymentMethod(prefilledData.payment_method as PaymentMethod);
+      setDateTime(prefilledData.transaction_date ? new Date(prefilledData.transaction_date) : new Date());
     } else {
       setType('expense'); setAmount(''); setCategory('其他');
       setMerchant(''); setNote(''); setPaymentMethod('微信');
+      setDateTime(new Date());
     }
   }, [editTransaction, prefilledData, visible]);
 
@@ -220,7 +224,7 @@ export default function TransactionForm({
           </View>
 
           {/* ---- 金额输入（玻璃卡片） ---- */}
-          <View style={[glass.liquidGlass, styles.amountSection, { alignItems: 'center' }]}>
+          <GlassView intensity="md" radius="lg" style={[styles.amountSection, { alignItems: 'center' }]}>
             <Text style={[styles.currencySymbol, { color: mutedColor }]}>¥</Text>
             <TextInput
               style={[styles.amountInput, { color: textColor }]}
@@ -237,7 +241,7 @@ export default function TransactionForm({
                 </TouchableOpacity>
               ))}
             </View>
-          </View>
+          </GlassView>
 
           {/* ---- 分类 ---- */}
           <Text style={[styles.sectionTitle, { color: mutedColor }]}>分类</Text>
@@ -273,12 +277,21 @@ export default function TransactionForm({
 
           {/* ---- 交易时间 ---- */}
           <Text style={[styles.sectionTitle, { color: mutedColor }]}>交易时间</Text>
-          <View style={[glass.liquidGlass, styles.dateTimeBox, { alignItems: 'center' }]}>
+          <GlassView intensity="sm" radius="md" style={[styles.dateTimeBox, { alignItems: 'center' }]}>
             <Text style={[styles.dateTimeText, { color: textColor }]}>
               {formatDateTime(dateTime)}
             </Text>
-            <Text style={[styles.dateTimeHint, { color: colors.tertiaryLabel }]}>点击调整（当前为系统时间）</Text>
-          </View>
+            <Text style={[styles.dateTimeHint, { color: colors.tertiaryLabel }]}>
+              {isEdit ? '编辑时默认保留原交易时间' : '默认使用当前系统时间'}
+            </Text>
+            <TouchableOpacity
+              style={[glass.liquidGlassChip, styles.nowButton]}
+              onPress={() => setDateTime(new Date())}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.nowButtonText, { color: colors.accent }]}>设为现在</Text>
+            </TouchableOpacity>
+          </GlassView>
 
           {/* ---- 删除（仅编辑模式） ---- */}
           {isEdit && (
@@ -340,7 +353,7 @@ const styles = StyleSheet.create({
   // 分区
   sectionTitle: {
     fontSize: 13, fontWeight: '600', textTransform: 'uppercase',
-    letterSpacing: 0.5, marginBottom: 8, marginTop: 4,
+    letterSpacing: 0, marginBottom: 8, marginTop: 4,
   },
 
   // Chip 网格
@@ -352,6 +365,8 @@ const styles = StyleSheet.create({
   dateTimeBox: { marginBottom: 20, paddingHorizontal: 14, paddingVertical: 12 },
   dateTimeText: { fontSize: 16, fontWeight: '500' },
   dateTimeHint: { fontSize: 12, color: '#AEAEB2', marginTop: 4 },
+  nowButton: { marginTop: 10, paddingHorizontal: 14, paddingVertical: 7 },
+  nowButtonText: { fontSize: 14, fontWeight: '500', color: '#007AFF' },
 
   // 删除
   deleteButton: { alignItems: 'center', paddingVertical: 16, marginTop: 12 },

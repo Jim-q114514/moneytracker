@@ -21,6 +21,7 @@ import {
   Alert,
   ActivityIndicator,
   Animated,
+  DeviceEventEmitter,
   useColorScheme,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -41,12 +42,14 @@ import {
 import { generateTransactionId } from '../utils/hash';
 import { parseCSV, ParsedTransaction } from '../utils/csvParser';
 import { importFromJSON } from '../utils/exportImport';
+import { TRANSACTIONS_CHANGED_EVENT } from '../utils/events';
 import { createGlassStyles } from '../theme/glassStyles';
 import { getSemanticColors } from '../theme/designSystem';
 import TransactionItem from '../components/TransactionItem';
 import TransactionForm from '../components/TransactionForm';
 import ImportResultModal from '../components/ImportResultModal';
 import MonthPicker, { MonthOption } from '../components/MonthPicker';
+import GlassView from '../components/GlassView';
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
@@ -93,6 +96,19 @@ export default function TransactionsScreen() {
         setLoading(false);
       });
   }, []);
+
+  useEffect(() => {
+    const subscription = DeviceEventEmitter.addListener(
+      TRANSACTIONS_CHANGED_EVENT,
+      () => {
+        loadData();
+      }
+    );
+
+    return () => {
+      subscription.remove();
+    };
+  }, [selectedMonth]);
 
   // ---- 加载数据 ----
   async function loadData() {
@@ -188,7 +204,7 @@ export default function TransactionsScreen() {
       }
       setFormVisible(false);
       setEditingTransaction(null);
-      await loadTransactions(selectedMonth);
+      await loadData();
     } catch (err: any) {
       Alert.alert('保存失败', err.message);
     }
@@ -210,7 +226,7 @@ export default function TransactionsScreen() {
     try {
       await deleteTransaction(id);
       showToast('交易已删除');
-      await loadTransactions(selectedMonth);
+      await loadData();
     } catch (err: any) {
       Alert.alert('删除失败', err.message);
     }
@@ -264,9 +280,8 @@ export default function TransactionsScreen() {
 
       for (const t of parsed.transactions) {
         try {
-          const id = generateTransactionId();
           batchData.push({
-            id,
+            id: t.id, // 使用 CSV 解析器生成的确定性 ID（相同交易永远相同 → 真正去重）
             amount: t.amount,
             type: t.type,
             category: guessCategory(t.merchant, t.product, t.type),
@@ -290,7 +305,7 @@ export default function TransactionsScreen() {
       setImportVisible(true);
 
       // 刷新数据
-      await loadTransactions(selectedMonth);
+      await loadData();
     } catch (err: any) {
       Alert.alert('导入失败', err.message);
     }
@@ -313,7 +328,7 @@ export default function TransactionsScreen() {
       setImportVisible(true);
 
       // 刷新数据
-      await loadTransactions(selectedMonth);
+      await loadData();
     } catch (err: any) {
       Alert.alert('导入失败', err.message);
     }
@@ -364,7 +379,7 @@ export default function TransactionsScreen() {
   // ---- 列表头部（汇总卡片） ----
   function renderHeader() {
     return (
-      <View style={[glass.liquidGlass, styles.summaryCard]}>
+      <GlassView intensity="md" radius="lg" style={styles.summaryCard}>
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
             <Text style={[styles.summaryLabel, { color: colors.secondaryLabel }]}>支出</Text>
@@ -397,7 +412,7 @@ export default function TransactionsScreen() {
         <Text style={[styles.transactionCount, { color: colors.tertiaryLabel }]}>
           共 {summary.count} 笔交易
         </Text>
-      </View>
+      </GlassView>
     );
   }
 
@@ -594,7 +609,7 @@ const styles = StyleSheet.create({
   summaryCard: {
     marginHorizontal: 16,
     marginVertical: 12,
-    padding: 18,
+    padding: 20,
   },
   summaryRow: {
     flexDirection: 'row',

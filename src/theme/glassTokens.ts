@@ -14,11 +14,11 @@ import { useColorScheme } from 'react-native';
 /** 玻璃模糊强度参数 */
 export const GLASS_BLUR = {
   /** 轻度模糊（小型控件） */
-  sm: 12,
+  sm: 16,
   /** 标准模糊（卡片、面板） */
-  md: 24,
+  md: 32,
   /** 强模糊（模态、弹窗、导航栏） */
-  lg: 40,
+  lg: 48,
   /** 极强模糊（全屏覆盖层） */
   xl: 60,
 } as const;
@@ -26,11 +26,11 @@ export const GLASS_BLUR = {
 /** 玻璃背景透明度（0-1，越大越不透明） */
 export const GLASS_OPACITY = {
   /** 浅色模式基础透明度 */
-  light: 0.28,
+  light: 0.64,
   /** 深色模式基础透明度 */
-  dark: 0.18,
+  dark: 0.44,
   /** 高亮模式（hover/press） */
-  highlight: 0.40,
+  highlight: 0.72,
 } as const;
 
 /** 玻璃圆角 */
@@ -44,8 +44,8 @@ export const GLASS_RADIUS = {
 
 /** 玻璃边框 */
 export const GLASS_BORDER = {
-  light: 'rgba(255, 255, 255, 0.30)',
-  dark: 'rgba(255, 255, 255, 0.12)',
+  light: 'rgba(255, 255, 255, 0.62)',
+  dark: 'rgba(255, 255, 255, 0.14)',
   width: 0.5,
 } as const;
 
@@ -53,10 +53,10 @@ export const GLASS_BORDER = {
 export const GLASS_SHADOW = {
   light: {
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.07,
+    shadowRadius: 26,
+    elevation: 7,
   },
   dark: {
     shadowColor: '#000',

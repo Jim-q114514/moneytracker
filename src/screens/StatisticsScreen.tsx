@@ -34,9 +34,9 @@ import {
   getMonthlySummary,
   getAvailableMonths,
 } from '../database/database';
-import { createGlassStyles } from '../theme/glassStyles';
 import { getSemanticColors } from '../theme/designSystem';
 import MonthPicker, { MonthOption } from '../components/MonthPicker';
+import GlassView from '../components/GlassView';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -51,7 +51,6 @@ export default function StatisticsScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const glass = createGlassStyles(isDark);
   const colors = getSemanticColors(isDark);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -172,7 +171,7 @@ export default function StatisticsScreen() {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.systemBackground }]}
       contentContainerStyle={styles.scrollContent}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -196,7 +195,7 @@ export default function StatisticsScreen() {
       ) : (
         <>
           {/* ---- 月度收支概览 ---- */}
-          <View style={[glass.liquidGlass, styles.summaryCard]}>
+          <GlassView intensity="md" radius="lg" style={styles.summaryCard}>
             <Text style={[styles.cardTitle, { color: colors.label }]}>月度概览</Text>
             <View style={styles.summaryRow}>
               <View style={styles.summaryItem}>
@@ -223,11 +222,11 @@ export default function StatisticsScreen() {
                 </Text>
               </View>
             </View>
-          </View>
+          </GlassView>
 
           {/* ---- 消费分类饼图 ---- */}
           {pieData.length > 0 && (
-            <View style={[glass.liquidGlass, styles.chartCard]}>
+            <GlassView intensity="md" radius="lg" style={styles.chartCard}>
               <Text style={[styles.cardTitle, { color: colors.label }]}>支出分类占比</Text>
               <PieChart
                 data={pieData}
@@ -241,12 +240,12 @@ export default function StatisticsScreen() {
                 paddingLeft="15"
                 absolute={false}
               />
-            </View>
+            </GlassView>
           )}
 
           {/* ---- 近 6 个月趋势 ---- */}
           {trends.length > 0 && trends.some((t) => t.expense > 0 || t.income > 0) && (
-            <View style={[glass.liquidGlass, styles.chartCard]}>
+            <GlassView intensity="md" radius="lg" style={styles.chartCard}>
               <Text style={[styles.cardTitle, { color: colors.label }]}>近 6 个月趋势</Text>
               <BarChart
                 data={barData}
@@ -279,12 +278,12 @@ export default function StatisticsScreen() {
                 fromZero
                 showBarTops={false}
               />
-            </View>
+            </GlassView>
           )}
 
           {/* ---- 分类排行榜 ---- */}
           {categoryStats.length > 0 && (
-            <View style={[glass.liquidGlass, styles.rankCard]}>
+            <GlassView intensity="md" radius="lg" style={styles.rankCard}>
               <Text style={[styles.cardTitle, { color: colors.label }]}>支出排行榜</Text>
               {categoryStats.slice(0, 10).map((cat, index) => (
                 <View key={cat.category} style={[styles.rankItem, { borderBottomColor: colors.separator }]}>
@@ -324,12 +323,12 @@ export default function StatisticsScreen() {
                   </View>
                 </View>
               ))}
-            </View>
+            </GlassView>
           )}
 
           {/* ---- 月度趋势详情表格 ---- */}
           {trends.length > 0 && (
-            <View style={[glass.liquidGlass, styles.rankCard]}>
+            <GlassView intensity="md" radius="lg" style={styles.rankCard}>
               <Text style={[styles.cardTitle, { color: colors.label }]}>月度收支明细</Text>
               {trends.slice().reverse().map((t) => (
                 <View key={t.month} style={[styles.trendItem, { borderBottomColor: colors.separator }]}>
@@ -357,7 +356,7 @@ export default function StatisticsScreen() {
                   </Text>
                 </View>
               ))}
-            </View>
+            </GlassView>
           )}
         </>
       )}

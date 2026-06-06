@@ -10,14 +10,14 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Alert, Animated, Text, StyleSheet, View } from 'react-native';
+import { Alert, Animated, DeviceEventEmitter, Text, StyleSheet, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as Linking from 'expo-linking';
 
 import AppNavigator from './src/navigation/AppNavigator';
 import { initDatabase, addTransaction } from './src/database/database';
 import { generateTransactionId } from './src/utils/hash';
-import { NewTransaction } from './src/types';
+import { TRANSACTIONS_CHANGED_EVENT } from './src/utils/events';
 
 /** 解析 URL 参数 */
 function parseQueryParams(url: string): Record<string, string> {
@@ -118,6 +118,8 @@ export default function App() {
         payment_method: payment as any,
         transaction_date: transactionDate,
       });
+
+      DeviceEventEmitter.emit(TRANSACTIONS_CHANGED_EVENT);
 
       const typeLabel = type === 'income' ? '收入' : '支出';
       showToast(`✅ 自动记账成功：${typeLabel} ¥${amount.toFixed(2)} - ${merchant}`);

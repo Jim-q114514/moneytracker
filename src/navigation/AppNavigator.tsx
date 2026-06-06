@@ -10,6 +10,7 @@ import { Platform, StyleSheet, useColorScheme } from 'react-native';
 import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 
 import TransactionsScreen from '../screens/TransactionsScreen';
 import StatisticsScreen from '../screens/StatisticsScreen';
@@ -68,15 +69,23 @@ export default function AppNavigator() {
           tabBarActiveTintColor: colors.accent,
           tabBarInactiveTintColor: colors.tertiaryLabel,
           tabBarStyle: {
-            backgroundColor: isDark
-              ? 'rgba(28,28,30,0.82)'
-              : 'rgba(255,255,255,0.78)',
+            position: 'absolute',
+            backgroundColor: 'transparent',
             borderTopColor: colors.separator,
             borderTopWidth: 0.5,
             paddingBottom: Platform.OS === 'ios' ? 24 : 8,
             paddingTop: 6,
             height: Platform.OS === 'ios' ? 86 : 60,
+            elevation: 0,
+            shadowOpacity: 0,
           },
+          tabBarBackground: () => (
+            <BlurView
+              intensity={Platform.OS === 'ios' ? 48 : 0}
+              tint={isDark ? 'dark' : 'light'}
+              style={StyleSheet.absoluteFill}
+            />
+          ),
           tabBarLabelStyle: {
             fontSize: 11,
             fontWeight: '500',

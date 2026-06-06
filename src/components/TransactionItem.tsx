@@ -14,13 +14,12 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
 } from 'react-native';
 import { Transaction } from '../types';
 import { getShortId } from '../utils/hash';
-import { createGlassStyles } from '../theme/glassStyles';
 import { getSemanticColors } from '../theme/designSystem';
+import GlassView from './GlassView';
 
 /** 分类对应的表情图标 */
 const CATEGORY_ICONS: Record<string, string> = {
@@ -56,7 +55,6 @@ export default function TransactionItem({ transaction, onPress, onLongPress }: P
   const amountPrefix = isIncome ? '+' : '-';
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const glass = createGlassStyles(isDark);
   const colors = getSemanticColors(isDark);
   const amountColor = isIncome ? colors.income : colors.expense;
 
@@ -66,12 +64,13 @@ export default function TransactionItem({ transaction, onPress, onLongPress }: P
   const timeStr = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 
   return (
-    <TouchableOpacity
-      style={[glass.liquidGlass, styles.containerExtra]}
+    <GlassView
+      intensity="sm"
+      radius="md"
+      interactive
       onPress={() => onPress(transaction)}
       onLongPress={() => onLongPress?.(transaction)}
-      activeOpacity={0.6}
-      delayLongPress={500}
+      style={styles.containerExtra}
     >
       {/* 分类图标 */}
       <View style={[styles.iconContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)' }]}>
@@ -105,7 +104,7 @@ export default function TransactionItem({ transaction, onPress, onLongPress }: P
           </Text>
         ) : null}
       </View>
-    </TouchableOpacity>
+    </GlassView>
   );
 }
 
