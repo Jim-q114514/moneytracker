@@ -9,9 +9,12 @@
 
 import Papa from 'papaparse';
 import { TransactionType, PaymentMethod } from '../types';
+import { generateDeterministicId } from './hash';
 
-/** 解析后的原始交易数据（不含唯一编号） */
+/** 解析后的原始交易数据（含确定性编号，用于去重） */
 export interface ParsedTransaction {
+  /** 确定性唯一编号（由交易数据哈希生成，相同交易永远相同） */
+  id: string;
   /** 交易时间（ISO 格式） */
   transaction_date: string;
   /** 交易类型 */
@@ -26,7 +29,7 @@ export interface ParsedTransaction {
   payment_method: PaymentMethod;
   /** 备注 */
   note: string;
-  /** 原始交易单号（用于辅助识别） */
+  /** 原始交易单号（用于辅助识别 + 生成确定性 ID 的核心种子） */
   original_order_id: string;
 }
 
@@ -124,11 +127,22 @@ function parseWechatRow(row: Record<string, string>): ParsedTransaction {
   const product = (row['商品'] || '').trim();
   const payment = normalizePaymentMethod(row['支付方式'] || '其他');
   const note = (row['备注'] || '').trim();
+  const original_order_id = (row['交易单号'] || row['商户单号'] || '').trim();
 
   // 微信格式：商品字段可为空，用备注补充
   const combinedNote = [product, note].filter(Boolean).join(' | ');
 
+  // 用交易数据生成确定性 ID（相同交易多次导入生成相同 ID → 实现去重）
+  const id = generateDeterministicId({
+    transaction_date: date,
+    amount: Math.abs(amount),
+    type,
+    merchant,
+    original_order_id,
+  });
+
   return {
+    id,
     transaction_date: date,
     type,
     merchant,
@@ -136,7 +150,7 @@ function parseWechatRow(row: Record<string, string>): ParsedTransaction {
     amount: Math.abs(amount),
     payment_method: payment,
     note: combinedNote,
-    original_order_id: (row['交易单号'] || row['商户单号'] || '').trim(),
+    original_order_id,
   };
 }
 
@@ -151,10 +165,21 @@ function parseAlipayRow(row: Record<string, string>): ParsedTransaction {
   const product = (row['商品'] || '').trim();
   const payment = '支付宝'; // 支付宝账单通常不标明子支付方式
   const note = (row['备注'] || '').trim();
+  const original_order_id = (row['交易订单号'] || row['商家订单号'] || '').trim();
 
   const combinedNote = [product, note].filter(Boolean).join(' | ');
 
+  // 用交易数据生成确定性 ID（相同交易多次导入生成相同 ID → 实现去重）
+  const id = generateDeterministicId({
+    transaction_date: date,
+    amount: Math.abs(amount),
+    type,
+    merchant,
+    original_order_id,
+  });
+
   return {
+    id,
     transaction_date: date,
     type,
     merchant,
@@ -162,7 +187,7 @@ function parseAlipayRow(row: Record<string, string>): ParsedTransaction {
     amount: Math.abs(amount),
     payment_method: payment,
     note: combinedNote,
-    original_order_id: (row['交易订单号'] || row['商家订单号'] || '').trim(),
+    original_order_id,
   };
 }
 

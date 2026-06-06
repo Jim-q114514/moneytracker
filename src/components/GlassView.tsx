@@ -15,6 +15,7 @@ import {
   View,
   StyleSheet,
   ViewStyle,
+  StyleProp,
   useColorScheme,
   Pressable,
 } from 'react-native';
@@ -44,9 +45,11 @@ interface GlassViewProps {
   /** 是否可交互（启用 press 反馈） */
   interactive?: boolean;
   /** 自定义样式 */
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   /** 按下回调 */
   onPress?: () => void;
+  /** 长按回调 */
+  onLongPress?: () => void;
   /** 是否启用边缘折射 SVG 滤镜（性能开销大，默认关闭） */
   enableEdgeRefraction?: boolean;
 }
@@ -60,6 +63,7 @@ export default function GlassView({
   interactive = false,
   style,
   onPress,
+  onLongPress,
   enableEdgeRefraction = false,
 }: GlassViewProps) {
   const colorScheme = useColorScheme();
@@ -134,15 +138,15 @@ export default function GlassView({
   );
 
   // 可交互模式：包裹 Pressable 实现 press 反馈
-  if (interactive && onPress) {
+  if (interactive && (onPress || onLongPress)) {
     return (
-      <Pressable onPress={onPress}>
+      <Pressable onPress={onPress} onLongPress={onLongPress} delayLongPress={500}>
         {({ pressed }) => (
           <View
             style={[
               pressed && {
-                transform: [{ scale: 0.97 }],
-                opacity: 0.9,
+                transform: [{ scale: 0.985 }],
+                opacity: 0.92,
               },
             ]}
           >

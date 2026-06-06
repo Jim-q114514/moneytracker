@@ -365,6 +365,14 @@ export async function deleteAllTransactions(): Promise<void> {
 }
 
 /**
+ * 将 WAL 日志写回主数据库文件，便于导出 .db 备份
+ */
+export async function checkpointDatabase(): Promise<void> {
+  const database = getDatabase();
+  await database.execAsync('PRAGMA wal_checkpoint(TRUNCATE);');
+}
+
+/**
  * 获取数据库文件路径（用于导出）
  */
 export function getDatabasePath(): string {

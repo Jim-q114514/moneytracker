@@ -35,6 +35,9 @@ yarn-error.*
 # 临时文件
 *.tmp
 *.temp
+微信账单_*.csv
+ios_p12_base64.txt
+ios_profile_base64.txt
 
 # Metro
 .metro-health-check-*

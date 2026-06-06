@@ -24,6 +24,12 @@ import { Radius, ShadowStrategy, Spacing } from './designSystem';
  */
 export function createGlassStyles(isDark: boolean) {
   const tokens = getGlassTokens(isDark);
+  const glassBackground = isDark
+    ? `rgba(28, 28, 30, ${tokens.backgroundOpacity})`
+    : `rgba(255, 255, 255, ${tokens.backgroundOpacity})`;
+  const glassBackgroundElevated = isDark
+    ? `rgba(44, 44, 46, ${Math.min(tokens.backgroundOpacity + 0.10, 0.86)})`
+    : `rgba(255, 255, 255, ${Math.min(tokens.backgroundOpacity + 0.08, 0.86)})`;
 
   // 深色模式用边框替代阴影
   const cardElevation = isDark
@@ -40,7 +46,7 @@ export function createGlassStyles(isDark: boolean) {
   return {
     // ---- 基础液态玻璃卡片（圆角 16pt） ----
     liquidGlass: {
-      backgroundColor: `rgba(255, 255, 255, ${tokens.backgroundOpacity})`,
+      backgroundColor: glassBackground,
       borderRadius: Radius.card,
       ...cardElevation,
       overflow: 'hidden' as const,
@@ -48,7 +54,7 @@ export function createGlassStyles(isDark: boolean) {
 
     // ---- 高亮液态玻璃（悬浮态，圆角 20pt） ----
     liquidGlassElevated: {
-      backgroundColor: `rgba(255, 255, 255, ${tokens.backgroundOpacity + 0.06})`,
+      backgroundColor: glassBackgroundElevated,
       borderRadius: Radius.modal,
       ...(isDark
         ? {
@@ -65,7 +71,7 @@ export function createGlassStyles(isDark: boolean) {
 
     // ---- 玻璃按钮/胶囊（圆角 max） ----
     liquidGlassPill: {
-      backgroundColor: `rgba(255, 255, 255, ${tokens.backgroundOpacity})`,
+      backgroundColor: glassBackground,
       borderRadius: Radius.pill,
       ...(isDark
         ? {
@@ -85,7 +91,9 @@ export function createGlassStyles(isDark: boolean) {
 
     // ---- 玻璃导航栏 ----
     liquidGlassNav: {
-      backgroundColor: `rgba(255, 255, 255, ${tokens.backgroundOpacity + 0.04})`,
+      backgroundColor: isDark
+        ? 'rgba(28, 28, 30, 0.70)'
+        : 'rgba(255, 255, 255, 0.72)',
       borderBottomWidth: 0.5,
       borderBottomColor: isDark
         ? ShadowStrategy.darkBorder
@@ -101,7 +109,7 @@ export function createGlassStyles(isDark: boolean) {
 
     // ---- 玻璃输入框（圆角 12pt） ----
     liquidGlassInput: {
-      backgroundColor: `rgba(255, 255, 255, ${tokens.backgroundOpacity + 0.04})`,
+      backgroundColor: glassBackgroundElevated,
       borderRadius: Radius.input,
       borderWidth: 0.5,
       borderColor: tokens.borderColor,
@@ -119,7 +127,7 @@ export function createGlassStyles(isDark: boolean) {
 
     // ---- 玻璃标签/Chip（圆角 10pt） ----
     liquidGlassChip: {
-      backgroundColor: `rgba(255, 255, 255, ${tokens.backgroundOpacity})`,
+      backgroundColor: glassBackground,
       borderRadius: Radius.chip,
       borderWidth: 0.5,
       borderColor: tokens.borderColor,
@@ -130,8 +138,8 @@ export function createGlassStyles(isDark: boolean) {
     // ---- 玻璃 Chip 选中态 ----
     liquidGlassChipSelected: {
       backgroundColor: isDark
-        ? 'rgba(0, 122, 255, 0.35)'
-        : 'rgba(0, 122, 255, 0.85)',
+        ? 'rgba(10, 132, 255, 0.48)'
+        : 'rgba(0, 122, 255, 0.92)',
       borderColor: isDark
         ? 'rgba(255, 255, 255, 0.25)'
         : 'rgba(255, 255, 255, 0.5)',

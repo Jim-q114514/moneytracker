@@ -15,9 +15,9 @@
 /** 浅色模式语义色 */
 export const LightColors = {
   // ── 背景 ──
-  systemBackground: '#F2F2F7',
+  systemBackground: '#F7F7FA',
   secondarySystemBackground: '#FFFFFF',
-  groupedBackground: '#F2F2F7',
+  groupedBackground: '#F7F7FA',
 
   // ── 文字（全部 ≥ 4.5:1 对比度） ──
   /** 主文字，对比度 ~18:1 */
@@ -152,7 +152,7 @@ export const Typography = {
   footnote: {
     fontSize: 13,
     fontWeight: '400' as const,
-    letterSpacing: 0.5,
+    letterSpacing: 0,
   },
   /** 辅助说明文字（确保对比度 ≥ 4.5:1） */
   caption1: {
@@ -190,18 +190,18 @@ export const Spacing = {
 // ============================================================
 
 export const Radius = {
-  /** 卡片圆角 — 16pt */
-  card: 16,
+  /** 卡片圆角 — 20pt */
+  card: 20,
   /** 按钮圆角 — 12pt */
   button: 12,
   /** Chip/标签圆角 */
-  chip: 10,
+  chip: 14,
   /** 输入框圆角 */
   input: 12,
   /** 模态框圆角 */
   modal: 20,
   /** 图标容器圆角 */
-  iconContainer: 10,
+  iconContainer: 14,
   /** 完全圆角（胶囊形） */
   pill: 9999,
   /** 开关/Toggle 圆角 */

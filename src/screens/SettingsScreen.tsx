@@ -18,7 +18,6 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Linking,
   useColorScheme,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -27,19 +26,19 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 import {
   getAllTransactions,
+  checkpointDatabase,
   deleteAllTransactions,
   getAvailableMonths,
   getDatabasePath,
 } from '../database/database';
 import { exportToJSON } from '../utils/exportImport';
-import { createGlassStyles } from '../theme/glassStyles';
 import { getSemanticColors } from '../theme/designSystem';
+import GlassView from '../components/GlassView';
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  const glass = createGlassStyles(isDark);
   const colors = getSemanticColors(isDark);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -83,6 +82,7 @@ export default function SettingsScreen() {
   async function handleExportDatabase() {
     try {
       setLoading(true);
+      await checkpointDatabase();
       const dbPath = getDatabasePath();
 
       // 检查文件是否存在
@@ -125,7 +125,7 @@ export default function SettingsScreen() {
           onPress: async () => {
             Alert.alert(
               '确认清理',
-              '输入 "删除" 确认此操作',
+              '请再次确认：这会永久删除所有交易记录。',
               [
                 { text: '取消', style: 'cancel' },
                 {
@@ -179,7 +179,7 @@ export default function SettingsScreen() {
       <Text style={[styles.pageTitle, { color: colors.label, paddingTop: insets.top + 8 }]}>设置</Text>
 
       {/* 数据概览 */}
-      <View style={[glass.liquidGlass, styles.statsCard]}>
+      <GlassView intensity="md" radius="lg" style={styles.statsCard}>
         <View style={styles.statItem}>
           <Text style={[styles.statNumber, { color: colors.accent }]}>{totalCount}</Text>
           <Text style={[styles.statLabel, { color: colors.secondaryLabel }]}>总交易数</Text>
@@ -189,7 +189,7 @@ export default function SettingsScreen() {
           <Text style={[styles.statNumber, { color: colors.accent }]}>{monthCount}</Text>
           <Text style={[styles.statLabel, { color: colors.secondaryLabel }]}>有记录月份</Text>
         </View>
-      </View>
+      </GlassView>
 
       {/* 加载指示器 */}
       {isLoading && (
@@ -202,7 +202,7 @@ export default function SettingsScreen() {
       {/* ---- 数据管理 ---- */}
       <Text style={[styles.sectionHeader, { color: colors.secondaryLabel }]}>数据管理</Text>
 
-      <View style={[glass.liquidGlass, styles.menuCard]}>
+      <GlassView intensity="md" radius="lg" style={styles.menuCard}>
         <MenuItem
           icon="📤"
           title="导出为 JSON"
@@ -215,7 +215,7 @@ export default function SettingsScreen() {
         <MenuItem
           icon="🗄️"
           title="导出数据库文件"
-          subtitle="完整数据库备份（.db 文件）"
+          subtitle="导出前会同步 WAL 日志"
           onPress={handleExportDatabase}
           colors={colors}
           isDark={isDark}
@@ -229,12 +229,12 @@ export default function SettingsScreen() {
           colors={colors}
           isDark={isDark}
         />
-      </View>
+      </GlassView>
 
       {/* ---- 自动记账 ---- */}
       <Text style={[styles.sectionHeader, { color: colors.secondaryLabel }]}>自动记账</Text>
 
-      <View style={[glass.liquidGlass, styles.menuCard]}>
+      <GlassView intensity="md" radius="lg" style={styles.menuCard}>
         <MenuItem
           icon="⚡"
           title="快捷指令自动记账"
@@ -265,12 +265,12 @@ export default function SettingsScreen() {
           colors={colors}
           isDark={isDark}
         />
-      </View>
+      </GlassView>
 
       {/* ---- 危险操作 ---- */}
       <Text style={[styles.sectionHeader, { color: colors.secondaryLabel }]}>危险操作</Text>
 
-      <View style={[glass.liquidGlass, styles.menuCard]}>
+      <GlassView intensity="md" radius="lg" style={styles.menuCard}>
         <MenuItem
           icon="🗑️"
           title="清理所有数据"
@@ -280,12 +280,12 @@ export default function SettingsScreen() {
           colors={colors}
           isDark={isDark}
         />
-      </View>
+      </GlassView>
 
       {/* ---- 关于 ---- */}
       <Text style={[styles.sectionHeader, { color: colors.secondaryLabel }]}>关于</Text>
 
-      <View style={[glass.liquidGlass, styles.menuCard]}>
+      <GlassView intensity="md" radius="lg" style={styles.menuCard}>
         <View style={styles.aboutRow}>
           <Text style={[styles.aboutLabel, { color: colors.label }]}>应用名称</Text>
           <Text style={[styles.aboutValue, { color: colors.secondaryLabel }]}>MoneyTracker</Text>
@@ -303,9 +303,9 @@ export default function SettingsScreen() {
         <MenuDivider color={colors.separator} />
         <View style={styles.aboutRow}>
           <Text style={[styles.aboutLabel, { color: colors.label }]}>Bundle ID</Text>
-          <Text style={[styles.aboutValue, { color: colors.secondaryLabel }]}>com.yourcompany.moneytracker</Text>
+          <Text style={[styles.aboutValue, { color: colors.secondaryLabel }]}>com.aramco.cycomm</Text>
         </View>
-      </View>
+      </GlassView>
 
       <View style={{ height: 50 }} />
     </ScrollView>
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#8E8E93',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0,
     paddingHorizontal: 20,
     marginTop: 24,
     marginBottom: 8,
