@@ -34,8 +34,8 @@ jobs:
           set -euo pipefail
 
           mkdir -p "$RUNNER_TEMP/signing"
-          echo "$IOS_P12_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/certificate.p12"
-          echo "$IOS_PROVISION_PROFILE_BASE64" | base64 --decode > "$RUNNER_TEMP/signing/profile.mobileprovision"
+          printf '%s' "$IOS_P12_BASE64" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/signing/certificate.p12"
+          printf '%s' "$IOS_PROVISION_PROFILE_BASE64" | tr -d '[:space:]' | base64 --decode > "$RUNNER_TEMP/signing/profile.mobileprovision"
 
           security create-keychain -p "$IOS_KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
