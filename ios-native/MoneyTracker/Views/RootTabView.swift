@@ -3,22 +3,23 @@ import SwiftUI
 
 struct RootTabView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appLanguage) private var language
 
     var body: some View {
         TabView {
             TransactionsView()
                 .tabItem {
-                    Label("账单", systemImage: "receipt")
+                    Label(L10n.text(.transactions, language), systemImage: "receipt")
                 }
 
             StatisticsView()
                 .tabItem {
-                    Label("统计", systemImage: "chart.pie")
+                    Label(L10n.text(.statistics, language), systemImage: "chart.pie")
                 }
 
             SettingsView()
                 .tabItem {
-                    Label("设置", systemImage: "gearshape")
+                    Label(L10n.text(.settings, language), systemImage: "gearshape")
                 }
         }
         .tint(.blue)

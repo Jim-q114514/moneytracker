@@ -1,5 +1,22 @@
 # 更新日志
 
+## Unreleased
+
+### 新增
+
+- 原生 iOS 版新增应用内语言切换，支持简体中文和英文，默认简体中文。
+- 设置页新增“外观”区域，说明应用自动跟随系统浅色 / 深色模式。
+
+### 优化
+
+- 重构原生版 Liquid Glass 基础样式，iOS 26+ 使用系统 `glassEffect` 和 `GlassEffectContainer`，旧系统回退到 `ultraThinMaterial`。
+- 优化账单、统计、编辑、设置页的文字可读性、金额格式和多语言显示。
+- 相邻玻璃卡片使用统一玻璃分组，增强 iOS 26 Liquid Glass 的整体感。
+
+### 注意
+
+- 未找到 Apple 官方 iOS 27 Liquid Glass API 文档，因此当前实现采用可向后兼容的 iOS 26 Liquid Glass API，并保留旧系统回退。
+
 ## 1.1.0 - 2026-06-10
 
 ### 新增

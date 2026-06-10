@@ -23,6 +23,9 @@ MoneyTracker 是一个 iOS 本地记账项目。当前主推版本是 **SwiftUI 
 - 支出分类占比图、分类排行榜
 - 近 6 个月收支趋势
 - 支持深色 / 浅色模式
+- 默认跟随系统外观，自动适配深色 / 浅色模式
+- 使用 iOS 26+ Liquid Glass 系统效果，低版本回退到原生半透明材质
+- 支持应用内语言切换：简体中文 / English，默认简体中文
 - 支持 `moneytracker://add` 自动记账
 - 支持 MoneyTracker JSON 导入 / 导出
 - 100% 本地存储，不上传服务器
@@ -179,6 +182,8 @@ MoneyTracker/
 | 原生数据 | SwiftData |
 | 原生图表 | Charts |
 | 原生文件迁移 | SwiftUI FileImporter / FileExporter |
+| 原生视觉 | SwiftUI Liquid Glass / Material |
+| 原生多语言 | AppStorage + Environment Locale |
 | 自动记账 | URL Scheme |
 | 旧版客户端 | Expo SDK 54 / React Native |
 | 旧版数据库 | expo-sqlite |

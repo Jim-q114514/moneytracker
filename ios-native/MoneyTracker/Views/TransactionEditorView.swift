@@ -9,6 +9,7 @@ enum TransactionEditorMode {
 struct TransactionEditorView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appLanguage) private var language
 
     let mode: TransactionEditorMode
 
@@ -39,9 +40,19 @@ struct TransactionEditorView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         typePicker
                         amountPanel
-                        chipSection("分类", items: categories, selected: category) { category = $0 }
+                        chipSection(
+                            L10n.text(.category, language),
+                            items: categories,
+                            selected: category,
+                            displayTitle: { L10n.category($0, language) }
+                        ) { category = $0 }
                         textSection
-                        chipSection("支付方式", items: PaymentMethod.allCases.map(\.rawValue), selected: paymentMethod.rawValue) {
+                        chipSection(
+                            L10n.text(.paymentMethod, language),
+                            items: PaymentMethod.allCases.map(\.rawValue),
+                            selected: paymentMethod.rawValue,
+                            displayTitle: { L10n.payment($0, language) }
+                        ) {
                             paymentMethod = PaymentMethod(rawValue: $0) ?? .other
                         }
                         dateSection
@@ -50,30 +61,30 @@ struct TransactionEditorView: View {
                     .padding(.vertical, 18)
                 }
             }
-            .navigationTitle(isEditing ? "编辑交易" : "新增交易")
+            .navigationTitle(isEditing ? L10n.text(.editTransactionTitle, language) : L10n.text(.addTransactionTitle, language))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") { dismiss() }
+                    Button(L10n.text(.cancel, language)) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("保存") { save() }
+                    Button(L10n.text(.save, language)) { save() }
                         .fontWeight(.semibold)
                 }
             }
-            .alert("请输入有效金额", isPresented: $showInvalidAmount) {
-                Button("好", role: .cancel) {}
+            .alert(L10n.text(.invalidAmountTitle, language), isPresented: $showInvalidAmount) {
+                Button(L10n.text(.confirm, language), role: .cancel) {}
             } message: {
-                Text("金额必须大于 0。")
+                Text(L10n.text(.invalidAmountMessage, language))
             }
             .onAppear(perform: loadInitialData)
         }
     }
 
     private var typePicker: some View {
-        Picker("收支类型", selection: $type) {
+        Picker(L10n.text(.typePicker, language), selection: $type) {
             ForEach(TransactionType.allCases) { item in
-                Text(item.title).tag(item)
+                Text(L10n.transactionType(item, language)).tag(item)
             }
         }
         .pickerStyle(.segmented)
@@ -109,16 +120,16 @@ struct TransactionEditorView: View {
 
     private var textSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("交易信息")
+            Text(L10n.text(.transactionInfo, language))
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.secondary)
 
             VStack(spacing: 0) {
-                TextField("商家 / 交易对方", text: $merchant)
+                TextField(L10n.text(.merchantPlaceholder, language), text: $merchant)
                     .textContentType(.organizationName)
                     .padding(.vertical, 12)
                 Divider()
-                TextField("备注（可选）", text: $note)
+                TextField(L10n.text(.notePlaceholder, language), text: $note)
                     .padding(.vertical, 12)
             }
             .padding(.horizontal, 14)
@@ -128,17 +139,23 @@ struct TransactionEditorView: View {
 
     private var dateSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("交易时间")
+            Text(L10n.text(.transactionTime, language))
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            DatePicker("时间", selection: $transactionDate, displayedComponents: [.date, .hourAndMinute])
+            DatePicker(L10n.text(.time, language), selection: $transactionDate, displayedComponents: [.date, .hourAndMinute])
                 .datePickerStyle(.compact)
                 .liquidGlassCard(cornerRadius: 20)
         }
     }
 
-    private func chipSection(_ title: String, items: [String], selected: String, onSelect: @escaping (String) -> Void) -> some View {
+    private func chipSection(
+        _ title: String,
+        items: [String],
+        selected: String,
+        displayTitle: @escaping (String) -> String = { $0 },
+        onSelect: @escaping (String) -> Void
+    ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title)
                 .font(.footnote.weight(.semibold))
@@ -149,7 +166,7 @@ struct TransactionEditorView: View {
                     Button {
                         onSelect(item)
                     } label: {
-                        Text(item)
+                        Text(displayTitle(item))
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(selected == item ? .white : .primary)
                             .padding(.horizontal, 14)
@@ -171,7 +188,7 @@ struct TransactionEditorView: View {
         type = transaction.type
         amountText = transaction.amount.formatted(.number.precision(.fractionLength(2)))
         category = transaction.category
-        merchant = transaction.merchant == "手动" ? "" : transaction.merchant
+        merchant = transaction.merchant == L10n.text(.manualMerchant, .zhHans) ? "" : transaction.merchant
         note = transaction.note
         paymentMethod = transaction.paymentMethod
         transactionDate = transaction.transactionDate
@@ -184,7 +201,7 @@ struct TransactionEditorView: View {
         }
 
         let finalMerchant = merchant.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            ? "手动"
+            ? L10n.text(.manualMerchant, .zhHans)
             : merchant.trimmingCharacters(in: .whitespacesAndNewlines)
 
         switch mode {

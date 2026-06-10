@@ -3,6 +3,7 @@ import SwiftUI
 
 struct TransactionsView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.appLanguage) private var language
     @Query(sort: \Transaction.transactionDate, order: .reverse) private var transactions: [Transaction]
 
     @State private var selectedMonth = Calendar.current.startOfMonth(for: .now)
@@ -35,31 +36,33 @@ struct TransactionsView: View {
                         if filteredTransactions.isEmpty {
                             emptyState
                         } else {
-                            LazyVStack(spacing: 8) {
-                                ForEach(filteredTransactions) { transaction in
-                                    TransactionRow(transaction: transaction)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            editorTransaction = transaction
-                                        }
-                                        .contextMenu {
-                                            Button("编辑", systemImage: "pencil") {
+                            LiquidGlassGroup(spacing: 8) {
+                                LazyVStack(spacing: 8) {
+                                    ForEach(filteredTransactions) { transaction in
+                                        TransactionRow(transaction: transaction)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
                                                 editorTransaction = transaction
                                             }
-                                            Button("删除", systemImage: "trash", role: .destructive) {
-                                                deleteCandidate = transaction
+                                            .contextMenu {
+                                                Button(L10n.text(.edit, language), systemImage: "pencil") {
+                                                    editorTransaction = transaction
+                                                }
+                                                Button(L10n.text(.delete, language), systemImage: "trash", role: .destructive) {
+                                                    deleteCandidate = transaction
+                                                }
                                             }
-                                        }
+                                    }
                                 }
+                                .padding(.horizontal, 16)
                             }
-                            .padding(.horizontal, 16)
                         }
                     }
                     .padding(.top, 8)
                     .padding(.bottom, 100)
                 }
             }
-            .navigationTitle("账单")
+            .navigationTitle(L10n.text(.transactions, language))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -69,7 +72,7 @@ struct TransactionsView: View {
                             .font(.headline)
                     }
                     .buttonStyle(LiquidGlassButton())
-                    .accessibilityLabel("新增交易")
+                    .accessibilityLabel(L10n.text(.addTransaction, language))
                 }
             }
             .sheet(isPresented: $isAdding) {
@@ -78,11 +81,11 @@ struct TransactionsView: View {
             .sheet(item: $editorTransaction) { transaction in
                 TransactionEditorView(mode: .edit(transaction))
             }
-            .alert("删除交易", isPresented: deleteAlertBinding) {
-                Button("取消", role: .cancel) {
+            .alert(L10n.text(.deleteTransaction, language), isPresented: deleteAlertBinding) {
+                Button(L10n.text(.cancel, language), role: .cancel) {
                     deleteCandidate = nil
                 }
-                Button("删除", role: .destructive) {
+                Button(L10n.text(.delete, language), role: .destructive) {
                     if let deleteCandidate {
                         modelContext.delete(deleteCandidate)
                         try? modelContext.save()
@@ -90,7 +93,7 @@ struct TransactionsView: View {
                     deleteCandidate = nil
                 }
             } message: {
-                Text("删除后不可恢复。")
+                Text(L10n.text(.deleteWarning, language))
             }
             .onChange(of: months) { _, newValue in
                 if !newValue.contains(selectedMonth) {
@@ -131,45 +134,42 @@ struct TransactionsView: View {
     private var summaryCard: some View {
         VStack(spacing: 14) {
             HStack {
-                SummaryMetric(title: "支出", value: summary.totalExpense.moneyText, color: .red)
+                SummaryMetric(title: L10n.text(.totalExpense, language), value: summary.totalExpense.moneyText(language: language), color: .red)
                 Divider().frame(height: 38)
-                SummaryMetric(title: "收入", value: summary.totalIncome.moneyText, color: .green)
+                SummaryMetric(title: L10n.text(.totalIncome, language), value: summary.totalIncome.moneyText(language: language), color: .green)
             }
 
             Divider()
 
             HStack {
-                Text(summary.balance >= 0 ? "本月结余" : "本月超支")
+                Text(summary.balance >= 0 ? L10n.text(.monthBalance, language) : L10n.text(.monthOverspend, language))
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Spacer()
-                Text(abs(summary.balance).moneyText)
+                Text(abs(summary.balance).moneyText(language: language))
                     .font(.title3.monospacedDigit().weight(.bold))
                     .foregroundStyle(summary.balance >= 0 ? .green : .red)
             }
 
-            Text("共 \(summary.count) 笔交易")
+            Text(String(format: L10n.text(.transactionCountFormat, language), summary.count))
                 .font(.caption)
                 .foregroundStyle(.tertiary)
         }
-        .liquidGlassCard(cornerRadius: 28)
+        .liquidGlassCard(cornerRadius: 28, prominence: .accent)
         .padding(.horizontal, 16)
     }
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("暂无交易记录", systemImage: "tray")
+            Label(L10n.text(.emptyTransactionsTitle, language), systemImage: "tray")
         } description: {
-            Text("点击右上角 + 添加第一笔交易")
+            Text(L10n.text(.emptyTransactionsDescription, language))
         }
         .padding(.top, 80)
     }
 
     private func monthLabel(_ date: Date) -> String {
-        if Calendar.current.isDate(date, equalTo: .now, toGranularity: .month) {
-            return "本月"
-        }
-        return date.formatted(.dateTime.year().month(.wide))
+        date.monthLabel(language: language)
     }
 }
 
@@ -194,6 +194,8 @@ private struct SummaryMetric: View {
 }
 
 private struct TransactionRow: View {
+    @Environment(\.appLanguage) private var language
+
     let transaction: Transaction
 
     var body: some View {
@@ -212,11 +214,11 @@ private struct TransactionRow: View {
                     .font(.headline)
                     .lineLimit(1)
                 HStack(spacing: 4) {
-                    Text(transaction.category)
+                    Text(L10n.category(transaction.category, language))
                     Text("·")
-                    Text(transaction.paymentMethod.rawValue)
+                    Text(L10n.payment(transaction.paymentMethod.rawValue, language))
                     Text("·")
-                    Text(transaction.transactionDate.formatted(date: .omitted, time: .shortened))
+                    Text(transaction.transactionDate.formatted(.dateTime.hour().minute().locale(Locale(identifier: language.localeIdentifier))))
                 }
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -231,7 +233,7 @@ private struct TransactionRow: View {
 
             Spacer()
 
-            Text("\(transaction.type == .income ? "+" : "-")\(transaction.amount.moneyText)")
+            Text("\(transaction.type == .income ? "+" : "-")\(transaction.amount.moneyText(language: language))")
                 .font(.headline.monospacedDigit())
                 .foregroundStyle(transaction.type == .income ? .green : .red)
                 .lineLimit(1)

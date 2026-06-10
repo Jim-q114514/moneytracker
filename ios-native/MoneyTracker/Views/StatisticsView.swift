@@ -3,6 +3,7 @@ import SwiftData
 import SwiftUI
 
 struct StatisticsView: View {
+    @Environment(\.appLanguage) private var language
     @Query(sort: \Transaction.transactionDate, order: .reverse) private var transactions: [Transaction]
     @State private var selectedMonth = Calendar.current.startOfMonth(for: .now)
 
@@ -28,27 +29,29 @@ struct StatisticsView: View {
                 Color.appBackground.ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 16) {
-                        monthPicker
-                        summaryCard
+                    LiquidGlassGroup(spacing: 16) {
+                        VStack(spacing: 16) {
+                            monthPicker
+                            summaryCard
 
-                        if summary.count == 0 {
-                            emptyState
-                        } else {
-                            if !categoryStats.isEmpty {
-                                categoryChart
-                                categoryRank
+                            if summary.count == 0 {
+                                emptyState
+                            } else {
+                                if !categoryStats.isEmpty {
+                                    categoryChart
+                                    categoryRank
+                                }
+
+                                trendChart
+                                trendList
                             }
-
-                            trendChart
-                            trendList
                         }
+                        .padding(.top, 8)
+                        .padding(.bottom, 100)
                     }
-                    .padding(.top, 8)
-                    .padding(.bottom, 100)
                 }
             }
-            .navigationTitle("统计")
+            .navigationTitle(L10n.text(.statistics, language))
             .onChange(of: months) { _, newValue in
                 if !newValue.contains(selectedMonth) {
                     selectedMonth = newValue.first ?? Calendar.current.startOfMonth(for: .now)
@@ -80,22 +83,22 @@ struct StatisticsView: View {
 
     private var summaryCard: some View {
         HStack(spacing: 12) {
-            StatBox(title: "收入", value: summary.totalIncome.moneyText, color: .green)
-            StatBox(title: "支出", value: summary.totalExpense.moneyText, color: .red)
-            StatBox(title: "结余", value: summary.balance.moneyText, color: summary.balance >= 0 ? .green : .red)
+            StatBox(title: L10n.text(.income, language), value: summary.totalIncome.moneyText(language: language), color: .green)
+            StatBox(title: L10n.text(.expense, language), value: summary.totalExpense.moneyText(language: language), color: .red)
+            StatBox(title: L10n.text(.balance, language), value: summary.balance.moneyText(language: language), color: summary.balance >= 0 ? .green : .red)
         }
-        .liquidGlassCard(cornerRadius: 28)
+        .liquidGlassCard(cornerRadius: 28, prominence: .accent)
         .padding(.horizontal, 16)
     }
 
     private var categoryChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("支出分类占比")
+            Text(L10n.text(.categoryShare, language))
                 .font(.headline)
 
             Chart(categoryStats) { item in
                 SectorMark(
-                    angle: .value("金额", item.amount),
+                    angle: .value(L10n.text(.expense, language), item.amount),
                     innerRadius: .ratio(0.58),
                     angularInset: 1.5
                 )
@@ -110,19 +113,19 @@ struct StatisticsView: View {
 
     private var trendChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("近 6 个月趋势")
+            Text(L10n.text(.sixMonthTrend, language))
                 .font(.headline)
 
             Chart(trends) { item in
                 BarMark(
-                    x: .value("月份", item.month, unit: .month),
-                    y: .value("支出", item.expense)
+                    x: .value(L10n.text(.currentMonth, language), item.month, unit: .month),
+                    y: .value(L10n.text(.expense, language), item.expense)
                 )
                 .foregroundStyle(.blue.gradient)
 
                 LineMark(
-                    x: .value("月份", item.month, unit: .month),
-                    y: .value("收入", item.income)
+                    x: .value(L10n.text(.currentMonth, language), item.month, unit: .month),
+                    y: .value(L10n.text(.income, language), item.income)
                 )
                 .foregroundStyle(.green)
                 .interpolationMethod(.catmullRom)
@@ -138,7 +141,7 @@ struct StatisticsView: View {
 
     private var categoryRank: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("支出排行榜")
+            Text(L10n.text(.categoryRanking, language))
                 .font(.headline)
 
             let total = categoryStats.reduce(0) { $0 + $1.amount }
@@ -152,11 +155,11 @@ struct StatisticsView: View {
                         Circle()
                             .fill(item.color)
                             .frame(width: 10, height: 10)
-                        Text(item.category)
+                        Text(L10n.category(item.category, language))
                             .font(.subheadline.weight(.semibold))
                         Spacer()
                         VStack(alignment: .trailing, spacing: 2) {
-                            Text(item.amount.moneyText)
+                            Text(item.amount.moneyText(language: language))
                                 .font(.subheadline.monospacedDigit().weight(.semibold))
                             Text(item.percentage(of: total), format: .percent.precision(.fractionLength(1)))
                                 .font(.caption)
@@ -176,7 +179,7 @@ struct StatisticsView: View {
 
     private var trendList: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("月度收支明细")
+            Text(L10n.text(.monthlyDetails, language))
                 .font(.headline)
 
             ForEach(trends.reversed()) { item in
@@ -185,10 +188,10 @@ struct StatisticsView: View {
                         .font(.subheadline.weight(.semibold))
                         .frame(width: 76, alignment: .leading)
                     Spacer()
-                    Text("收 \(item.income.moneyText)")
+                    Text(String(format: L10n.text(.receivedFormat, language), item.income.moneyText(language: language)))
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.green)
-                    Text("支 \(item.expense.moneyText)")
+                    Text(String(format: L10n.text(.spentFormat, language), item.expense.moneyText(language: language)))
                         .font(.caption.monospacedDigit())
                         .foregroundStyle(.red)
                 }
@@ -201,18 +204,15 @@ struct StatisticsView: View {
 
     private var emptyState: some View {
         ContentUnavailableView {
-            Label("暂无统计数据", systemImage: "chart.pie")
+            Label(L10n.text(.noStatsTitle, language), systemImage: "chart.pie")
         } description: {
-            Text("添加交易记录后即可看到统计图表")
+            Text(L10n.text(.noStatsDescription, language))
         }
         .padding(.top, 80)
     }
 
     private func monthLabel(_ date: Date) -> String {
-        if Calendar.current.isDate(date, equalTo: .now, toGranularity: .month) {
-            return "本月"
-        }
-        return date.formatted(.dateTime.year().month(.wide))
+        date.monthLabel(language: language)
     }
 }
 
