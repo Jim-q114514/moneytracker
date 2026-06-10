@@ -1,114 +1,96 @@
-# MoneyTracker iOS .ipa 构建指南（Mac）
+# MoneyTracker 原生 iOS 构建指南（Mac）
 
-## 📋 准备工作
+本项目已经包含纯 SwiftUI 原生工程：
 
-### 1. 需要从 Windows 传到 Mac 的文件
+```text
+ios-native/MoneyTracker.xcodeproj
+```
 
-以下文件**不在 GitHub 上**（已通过 .gitignore 排除），需要单独复制到 Mac：
+如果你要构建 Swift 原生版，不需要再运行 `npx expo prebuild`。Expo 代码仍保留在仓库中，主要用于参考旧功能和数据格式。
 
-| 文件 | 用途 | 密码 |
-|------|------|------|
-| `certificate.p12`（或 `certificate_legacy.p12`）| 企业分发证书 | `iosxb.cn` |
-| `profile.mobileprovision` | 企业描述文件 | — |
+## 环境要求
 
-> 💡 放在项目根目录即可
+- macOS
+- Xcode 16 或更新版本
+- Git
+- 可用的 Apple Developer 签名材料
 
-### 2. Mac 上需要安装
+项目当前配置：
 
-- **Node.js** (v18+) — https://nodejs.org
-- **Xcode** (最新版) — App Store 下载
-- **Git** — Mac 自带，或 `xcode-select --install`
+| 项目 | 值 |
+|------|-----|
+| Xcode 工程 | `ios-native/MoneyTracker.xcodeproj` |
+| Scheme | `MoneyTracker` |
+| Bundle ID | `com.aramco.cycomm` |
+| Team ID | `4TDEWHFV5T` |
+| 最低 iOS | `18.0` |
+| 技术栈 | SwiftUI + SwiftData + Charts |
 
----
-
-## 🔨 构建步骤
-
-### 第 1 步：克隆项目
+## 本地调试运行
 
 ```bash
 git clone https://github.com/Jim-q114514/moneytracker.git
 cd moneytracker
-npm install
+open ios-native/MoneyTracker.xcodeproj
 ```
 
-### 第 2 步：安装证书
+在 Xcode 中：
 
-```bash
-# 导入 .p12 证书到钥匙串（需要输入密码 iosxb.cn）
-security import certificate.p12 -P iosxb.cn -T /usr/bin/codesign
+1. 选择 Scheme：`MoneyTracker`
+2. 选择 iPhone Simulator 或真机
+3. 如使用真机，进入 Target 的 `Signing & Capabilities` 检查 Team 和 Bundle ID
+4. 点击 Run
 
-# 安装描述文件
-open profile.mobileprovision
-# 或将描述文件复制到 Xcode 目录
-cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+## 本地 Archive 导出 IPA
+
+如果你有 `.p12` 证书和 `.mobileprovision` 描述文件：
+
+1. 双击或用 `security import` 导入 `.p12` 到钥匙串。
+2. 双击 `.mobileprovision` 安装描述文件。
+3. 打开 `ios-native/MoneyTracker.xcodeproj`。
+4. 选择 `Product -> Archive`。
+5. Archive 成功后在 Organizer 中选择 `Distribute App`。
+6. 根据签名类型选择 `Ad Hoc`、`Enterprise`、`Development` 或 `App Store Connect`。
+
+不要把证书、描述文件、证书密码写进仓库。密码应只保存在本地密码管理器或 GitHub Secrets 中。
+
+## 没有 Mac 时
+
+仓库已经包含 GitHub Actions 云端构建流程：
+
+```text
+.github/workflows/build-native-ios-ipa.yml
 ```
 
-或者手动操作：
-- 双击 `certificate.p12` → 输入密码 `iosxb.cn` → 导入到"登录"钥匙串
-- 双击 `profile.mobileprovision` → 自动安装到 Xcode
+详细步骤见：
 
-### 第 3 步：生成 iOS 原生项目
-
-```bash
-npx expo prebuild --platform ios
+```text
+ios-native/CLOUD_IPA_BUILD.md
 ```
 
-这会生成 `ios/` 目录，包含 Xcode 项目文件。
+你需要在 GitHub Actions Secrets 中配置：
 
-### 第 4 步：在 Xcode 中配置签名
-
-```bash
-open ios/moneytracker.xcworkspace
+```text
+IOS_P12_BASE64
+IOS_P12_PASSWORD
+IOS_PROVISION_PROFILE_BASE64
+IOS_KEYCHAIN_PASSWORD
 ```
 
-然后在 Xcode 中：
-1. 左侧选择 **moneytracker** 项目
-2. 选择 **Targets → moneytracker**
-3. **Signing & Capabilities** 标签页
-4. 取消勾选 "Automatically manage signing"
-5. **Provisioning Profile** 下拉选择 `CycommGroupAppProfile`
-6. **Signing Certificate** 选择 `iPhone Distribution: Aramco Services Company`
+## 常见问题
 
-### 第 5 步：Archive（归档）并导出 .ipa
+**`xcodebuild: command not found`**
 
-1. Xcode 顶部菜单：**Product → Archive**
-2. 等待编译完成（约 5-10 分钟）
-3. 在弹出的 Organizer 窗口中：
-   - 选中刚生成的 Archive
-   - 点击 **Distribute App**
-   - 选择 **Enterprise** → Next
-   - 选择 **Automatically manage signing** → Next
-   - 点击 **Export**，选择保存位置
-4. 得到 `moneytracker.ipa` 文件 🎉
+说明当前不是 macOS/Xcode 环境。Windows 上无法直接用 Xcode 编译 iOS App，请使用 Mac 或 GitHub Actions。
 
----
+**`No signing certificate found`**
 
-## 📦 项目信息速查
+说明 `.p12` 没有正确导入钥匙串，或证书和描述文件不匹配。
 
-| 项目 | 值 |
-|------|-----|
-| Bundle ID | `com.aramco.cycomm` |
-| Team ID | `4TDEWHFV5T` |
-| 显示名称 | MoneyTracker |
-| 版本号 | 1.0.0 (Build 1) |
-| 最低 iOS | 15.1 |
-| 证书名称 | iPhone Distribution: Aramco Services Company |
-| 证书密码 | `iosxb.cn` |
-| 描述文件 | CycommGroupAppProfile (IN_HOUSE) |
-| 证书过期 | 2026年9月24日 |
+**`Provisioning profile doesn't include the application identifier`**
 
----
+说明描述文件对应的 Bundle ID 和项目里的 `com.aramco.cycomm` 不一致。
 
-## ❓ 常见问题
+**旧 Expo 数据如何迁移？**
 
-**Q: "XXX is not in your keychain"**
-→ 确保已双击 .p12 导入证书，密码是 `iosxb.cn`
-
-**Q: "Provisioning profile not found"**
-→ 确保 .mobileprovision 已双击安装，Team ID 显示为 4TDEWHFV5T
-
-**Q: "No signing certificate found"**
-→ 在 Xcode → Settings → Accounts 中检查是否有 Aramco Services Company 的证书
-
-**Q: prebuild 失败**
-→ 确保 Node.js 版本 ≥ 18，运行 `node -v` 检查；然后 `npx expo prebuild --platform ios --clean`
+先在旧 Expo 版导出 MoneyTracker JSON，再在原生版 `设置 -> 数据迁移 -> 导入 JSON` 中导入。原生版会按交易 ID 自动跳过重复记录。
