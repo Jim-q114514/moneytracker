@@ -81,6 +81,23 @@ IOS_KEYCHAIN_PASSWORD
 
 然后在 GitHub 仓库的 `Actions` 页面手动运行 `Build Native iOS IPA`。
 
+## GitHub Actions 构建验证
+
+仓库还包含一个无签名构建验证流程：
+
+```text
+.github/workflows/validate-native-ios.yml
+```
+
+它会在 PR 和相关分支推送时自动运行：
+
+- 选择 GitHub 的 macOS runner
+- 打印 Xcode 版本和工程 Scheme
+- 使用 `xcodebuild build` 编译 `ios-native/MoneyTracker.xcodeproj`
+- 设置 `CODE_SIGNING_ALLOWED=NO`，所以不需要证书或描述文件
+
+这个流程用于验证“代码能不能编译”。真正导出 IPA 仍然使用 `Build Native iOS IPA`，因为 IPA 需要 Apple 签名材料。
+
 ## 旧 Expo 数据迁移到原生版
 
 因为原生版使用 SwiftData，旧 Expo 版使用 SQLite，两个数据库文件不能直接互换。推荐使用 JSON 中转：

@@ -10,6 +10,7 @@
 - 原生版支持 `moneytracker://add` URL Scheme，可继续配合 iOS 快捷指令自动记账。
 - 新增原生版 JSON 导入/导出能力，可导入旧 Expo 版导出的 MoneyTracker JSON。
 - 新增 GitHub Actions 原生 iOS IPA 构建流程：`.github/workflows/build-native-ios-ipa.yml`。
+- 新增 GitHub Actions 原生 iOS 无签名构建验证流程：`.github/workflows/validate-native-ios.yml`。
 
 ### 优化
 

@@ -1,0 +1,49 @@
+name: Validate Native iOS Build
+
+on:
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "ios-native/**"
+      - ".github/workflows/validate-native-ios.yml"
+  push:
+    branches:
+      - master
+      - "codex/**"
+    paths:
+      - "ios-native/**"
+      - ".github/workflows/validate-native-ios.yml"
+  workflow_dispatch:
+
+jobs:
+  build-simulator:
+    name: Build SwiftUI app for iOS Simulator
+    runs-on: macos-15
+
+    env:
+      PROJECT_PATH: ios-native/MoneyTracker.xcodeproj
+      SCHEME: MoneyTracker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app
+          xcodebuild -version
+
+      - name: Show schemes
+        run: |
+          xcodebuild -list -project "$PROJECT_PATH"
+
+      - name: Build without signing
+        run: |
+          set -euo pipefail
+          xcodebuild build \
+            -project "$PROJECT_PATH" \
+            -scheme "$SCHEME" \
+            -configuration Debug \
+            -destination "generic/platform=iOS Simulator" \
+            CODE_SIGNING_ALLOWED=NO
