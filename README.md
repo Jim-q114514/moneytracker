@@ -1,256 +1,184 @@
 # MoneyTracker - 智能记账软件
 
-一款基于 React Native (Expo) 的 iOS 本地记账应用，支持手动记账、自动记账（Siri 快捷指令集成）、微信/支付宝账单导入、跨设备数据同步等功能。
+MoneyTracker 是一个 iOS 本地记账项目。当前主推版本是 **SwiftUI 原生 iOS 版**，旧版 Expo / React Native 代码仍保留在仓库中，方便继续参考和迁移功能。
 
-## ✨ 功能特性
+## 当前版本
 
-### 📝 手动记账
-- 输入金额、分类（可自定义）、商家、备注、支付方式
-- 支持收入和支出快速切换
-- 分类智能推荐（根据商家名称自动推断分类）
+| 项目 | 说明 |
+|------|------|
+| 当前版本 | `1.1.0` |
+| 主推客户端 | SwiftUI 原生 iOS |
+| 原生工程 | `ios-native/MoneyTracker.xcodeproj` |
+| 旧版架构 | Expo / React Native |
+| 数据存储 | SwiftData / 本地存储 |
+| 自动记账 | `moneytracker://add` URL Scheme |
 
-### ⚡ 自动记账（Siri 快捷指令）
-- 注册自定义 URL Scheme：`moneytracker://add`
-- 当收到微信/支付宝支付通知时，快捷指令自动提取信息并调用 URL 添加交易
-- 支持通过快捷指令 App 设置自动化流程
+## 功能特性
 
-### 📥 账单导入
-- **微信账单 CSV**：自动识别 UTF-8/GBK 编码
-- **支付宝账单 CSV**：识别常见格式
-- **MoneyTracker JSON**：支持跨设备导入（如隔空投送）
+### Swift 原生 iOS 版
 
-### 📤 数据导出
-- 导出为 JSON 格式（保留完整交易信息）
-- 导出数据库文件（完整备份）
-- 支持隔空投送分享
+- 手动新增、编辑、删除交易记录
+- 支持收入 / 支出、分类、商家、备注、支付方式、交易时间
+- 月度收入、支出、结余汇总
+- 支出分类占比图、分类排行榜
+- 近 6 个月收支趋势
+- 支持深色 / 浅色模式
+- 支持 `moneytracker://add` 自动记账
+- 支持 MoneyTracker JSON 导入 / 导出
+- 100% 本地存储，不上传服务器
 
-### 🔐 重复检测
-- 每笔交易使用 UUID v4 作为唯一编号
-- 导入/导出时通过 UUID 精确识别，自动跳过已有记录
+### Expo 旧版仍保留
 
-### 📊 统计分析
-- 月度收支汇总卡片
-- 消费分类饼图
-- 近 6 个月收支趋势柱状图
-- 分类排行榜
+旧版位于项目根目录和 `src/` 中，主要功能包括：
 
-### 🎨 设计
-- 遵循 iOS 设计规范
-- 支持深色/浅色模式（跟随系统）
-- 卡片式布局、半透明效果
-- 适合 iPhone 和 iPad
+- Expo / React Native 页面和导航
+- SQLite 数据库操作
+- 微信 / 支付宝 CSV 解析
+- MoneyTracker JSON 导入 / 导出
+- Expo 文件选择、分享、URL Scheme 处理
 
-### 🔒 隐私
-- **100% 本地存储**，数据不上传任何服务器
-- 使用 SQLite 存储在设备本地
+后续如果继续完善原生版，建议优先把旧版 CSV 导入能力迁移到 Swift。
 
----
+## 快速运行原生 iOS 版
 
-## 🚀 快速开始
-
-### 环境要求
-- Node.js 18+
-- iOS 设备或模拟器
-- Expo Go App（在 App Store 下载）
-
-### 安装和运行
+需要 macOS 和 Xcode。
 
 ```bash
-# 1. 进入项目目录
-cd MoneyTracker
-
-# 2. 安装依赖
-npm install
-
-# 3. 启动 Expo 开发服务器
-npx expo start
+git clone https://github.com/Jim-q114514/moneytracker.git
+cd moneytracker
+open ios-native/MoneyTracker.xcodeproj
 ```
 
-启动后，使用 iPhone/iPad 上的 **Expo Go** App 扫描二维码即可预览。
+在 Xcode 中：
 
----
+1. 选择 Scheme：`MoneyTracker`
+2. 选择 iPhone Simulator 或真机
+3. 点击 Run
 
-## 🔗 URL Scheme 自动记账
+如果要真机运行或导出 IPA，需要配置 Apple Developer 签名。详细说明见：
 
-### 格式
-
+```text
+BUILD_MAC.md
+ios-native/CLOUD_IPA_BUILD.md
 ```
-moneytracker://add?amount=金额&merchant=商家&payment=支付方式&note=备注&type=expense|income&time=ISO日期(可选)
+
+## 没有 Mac 时如何构建 IPA
+
+仓库包含 GitHub Actions 工作流：
+
+```text
+.github/workflows/build-native-ios-ipa.yml
 ```
 
-### 参数说明
+你需要在 GitHub Actions Secrets 中配置：
+
+```text
+IOS_P12_BASE64
+IOS_P12_PASSWORD
+IOS_PROVISION_PROFILE_BASE64
+IOS_KEYCHAIN_PASSWORD
+```
+
+然后在 GitHub 仓库的 `Actions` 页面手动运行 `Build Native iOS IPA`。
+
+## 旧 Expo 数据迁移到原生版
+
+因为原生版使用 SwiftData，旧 Expo 版使用 SQLite，两个数据库文件不能直接互换。推荐使用 JSON 中转：
+
+### 从旧版导出
+
+1. 打开旧 Expo 版 MoneyTracker。
+2. 在设置或导出入口中导出 MoneyTracker JSON。
+3. 将 JSON 文件通过隔空投送、文件 App 或其他方式传到新 App 可访问的位置。
+
+### 导入到原生版
+
+1. 打开 Swift 原生版。
+2. 进入 `设置 -> 数据迁移 -> 导入 JSON`。
+3. 选择旧版导出的 JSON 文件。
+
+导入时会按交易 ID 自动跳过重复记录，不会反复导入同一笔账单。
+
+原生版也支持 `设置 -> 数据迁移 -> 导出 JSON`，可用于备份或跨设备迁移。
+
+## URL Scheme 自动记账
+
+格式：
+
+```text
+moneytracker://add?amount=金额&merchant=商家&payment=支付方式&note=备注&type=expense|income&time=ISO日期
+```
+
+参数说明：
 
 | 参数 | 必填 | 说明 | 示例 |
 |------|------|------|------|
-| `amount` | ✅ 是 | 金额（正数） | `28.50` |
-| `merchant` | 否 | 商家名称 | `星巴克` |
-| `payment` | 否 | 支付方式 | `微信`、`支付宝`、`现金` |
-| `note` | 否 | 备注 | `拿铁+三明治` |
-| `type` | 否 | 类型，默认 `expense` | `expense` 或 `income` |
-| `time` | 否 | 交易时间 ISO 格式 | `2024-01-15T10:30:00` |
+| `amount` | 是 | 金额，必须大于 0 | `28.50` |
+| `merchant` | 否 | 商家或交易对方 | `星巴克` |
+| `payment` | 否 | 支付方式 | `微信`、`支付宝`、`现金`、`银行卡` |
+| `note` | 否 | 备注 | `拿铁` |
+| `type` | 否 | `expense` 或 `income`，默认支出 | `expense` |
+| `time` | 否 | ISO 8601 时间 | `2026-06-10T10:30:00Z` |
 
-### 示例
+示例：
 
-```
+```text
 moneytracker://add?amount=28.50&merchant=星巴克&payment=微信&type=expense
-moneytracker://add?amount=2000&merchant=工资&payment=银行卡&type=income&note=1月工资
+moneytracker://add?amount=2000&merchant=工资&payment=银行卡&type=income&note=6月工资
 ```
 
----
+## 项目结构
 
-## 📱 设置 Siri 快捷指令自动记账
-
-### 步骤 1：创建快捷指令
-
-1. 打开 iOS 系统自带的 **「快捷指令」** App
-2. 点击底部 **「自动化」** 标签
-3. 点击右上角 **「+」** 创建新的自动化
-4. 选择 **「收到信息」** 作为触发条件
-
-### 步骤 2：设置触发条件
-
-- **发件人**：选择「微信支付」或「支付宝」
-- **内容包含**：可留空（匹配所有支付通知）
-
-### 步骤 3：添加操作
-
-1. 点击 **「添加操作」**
-2. 搜索并选择 **「从输入中获取文本」**
-3. 再添加 **「匹配文本」** 操作，使用正则表达式提取金额和商家：
-
-```
-匹配金额：金额¥?(\d+\.?\d*)
-匹配商家：在(.+?)消费|支付给(.+?)
-```
-
-4. 添加 **「设定变量」** 保存提取到的值
-5. 添加 **「打开 URL」** 操作，输入：
-
-```
-moneytracker://add?amount=变量金额&merchant=变量商家&payment=微信&type=expense
-```
-
-### 步骤 4：完成
-
-- 关闭 **「运行前询问」** 开关（实现全自动）
-- 点击 **「完成」** 保存
-
-之后每当收到微信/支付宝支付通知，就会自动记录一笔交易到 MoneyTracker！
-
-> 💡 **提示**：支付宝的支付通知格式与微信不同，需要创建两条自动化规则，分别匹配两种格式。
-
----
-
-## 📊 CSV 导入指南
-
-### 微信账单 CSV
-
-微信导出的账单格式如下（第一行为表头）：
-
-```
-交易时间,交易类型,交易对方,商品,收/支,金额(元),支付方式,当前状态,交易单号,商户单号,备注
-2024-01-15 10:30:00,商户消费,星巴克,拿铁咖啡,支出,28.50,零钱通,支付成功,1000100200300400500,, 
-```
-
-导入步骤：
-1. 微信 → 我 → 支付 → 钱包 → 账单 → 右上角「常见问题」→ 「下载账单」→ 「用于个人对账」
-2. 解压邮件附件中的 CSV 文件
-3. 在 MoneyTracker 账单页点击右上角「导入」→「微信/支付宝 CSV」
-4. 选择 CSV 文件即可
-
-### 支付宝账单 CSV
-
-支付宝导出格式：
-
-```
-交易时间,交易对方,商品,收/支,金额,交易状态,交易订单号,商家订单号,备注
-2024-01-15 10:30:00,星巴克,拿铁咖啡,支出,28.50,交易成功,20240115XXXXXXXX,,
-```
-
-导入步骤类似，在支付宝 App 中导出账单后选择对应的 CSV 文件即可。
-
----
-
-## 🔄 跨设备同步（iPhone ↔ iPad）
-
-由于 MoneyTracker 采用 100% 本地存储，跨设备同步通过以下方式实现：
-
-### 导出（设备 A）
-1. 进入「设置」→「导出为 JSON」
-2. 通过隔空投送发送到设备 B
-
-### 导入（设备 B）
-1. 接收隔空投送的文件
-2. 在 MoneyTracker 账单页点击「导入」→「MoneyTracker JSON」
-3. 选择刚接收的 JSON 文件
-
-应用会自动基于唯一编号去重，不会产生重复记录。
-
----
-
-## 📁 项目结构
-
-```
+```text
 MoneyTracker/
-├── App.tsx                          # 入口文件（含 URL Scheme 监听）
-├── app.json                         # Expo 配置
-├── package.json                     # 依赖管理
-├── tsconfig.json                    # TypeScript 配置
-├── babel.config.js                  # Babel 配置
-├── README.md                        # 项目文档
-├── assets/                          # 静态资源
-└── src/
-    ├── types/
-    │   └── index.ts                 # TypeScript 类型定义
-    ├── database/
-    │   └── database.ts              # SQLite 数据库操作层
-    ├── utils/
-    │   ├── hash.ts                  # SHA256 唯一编号生成
-    │   ├── csvParser.ts             # CSV 解析器（微信/支付宝）
-    │   └── exportImport.ts          # JSON 导出/导入
-    ├── screens/
-    │   ├── TransactionsScreen.tsx   # 账单列表页（首页）
-    │   ├── StatisticsScreen.tsx     # 统计图表页
-    │   └── SettingsScreen.tsx       # 设置页
-    ├── components/
-    │   ├── TransactionItem.tsx      # 交易列表项
-    │   ├── TransactionForm.tsx      # 新增/编辑交易表单
-    │   ├── ImportResultModal.tsx    # 导入结果弹窗
-    │   └── MonthPicker.tsx          # 月份选择器
-    └── navigation/
-        └── AppNavigator.tsx         # 底部标签导航
+├── ios-native/                         # SwiftUI 原生 iOS 版
+│   ├── MoneyTracker.xcodeproj
+│   └── MoneyTracker/
+│       ├── Data/                       # SwiftData 查询、URL 解析、JSON 迁移
+│       ├── Design/                     # 原生视觉样式
+│       ├── Models/                     # 交易模型
+│       └── Views/                      # 账单、统计、设置等页面
+├── src/                                # Expo 旧版源码
+│   ├── components/
+│   ├── database/
+│   ├── navigation/
+│   ├── screens/
+│   ├── theme/
+│   ├── types/
+│   └── utils/
+├── .github/workflows/                  # GitHub Actions 构建流程
+├── App.tsx                             # Expo 旧版入口
+├── package.json                        # Expo 旧版依赖和版本号
+├── BUILD_MAC.md                        # Mac 本地构建说明
+├── CHANGELOG.md                        # 更新日志
+└── README.md
 ```
 
----
+## 技术栈
 
-## 🛠️ 技术栈
-
-| 技术 | 用途 |
+| 模块 | 技术 |
 |------|------|
-| Expo SDK 50 | 跨平台开发框架 |
-| TypeScript | 类型安全 |
-| expo-sqlite | 本地数据库存储 |
-| UUID v4 | 交易唯一编号生成 |
-| expo-document-picker | 文件选择 |
-| expo-file-system | 文件读写 |
-| expo-sharing | 文件分享 |
-| expo-linking | URL Scheme 处理 |
-| React Navigation | 导航 |
-| react-native-chart-kit | 图表 |
-| PapaParse | CSV 解析 |
+| 原生 iOS | SwiftUI |
+| 原生数据 | SwiftData |
+| 原生图表 | Charts |
+| 原生文件迁移 | SwiftUI FileImporter / FileExporter |
+| 自动记账 | URL Scheme |
+| 旧版客户端 | Expo SDK 54 / React Native |
+| 旧版数据库 | expo-sqlite |
+| 旧版 CSV 解析 | PapaParse |
 
----
+## 版本记录
 
-## 📝 License
+详细更新内容见：
+
+```text
+CHANGELOG.md
+```
+
+## License
 
 MIT License
 
----
-
-## 👤 作者
+## 作者
 
 **Jim（瑾墨）** - 一名正在学习编程的高中生。
-
----
-
-*Made with ❤️ and React Native Expo*

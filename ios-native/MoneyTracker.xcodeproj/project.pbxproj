@@ -17,6 +17,7 @@
 		1A0000010000000000000008 /* StatisticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000010000000000000108 /* StatisticsView.swift */; };
 		1A0000010000000000000009 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A0000010000000000000109 /* SettingsView.swift */; };
 		1A000001000000000000000A /* URLTransactionParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000001000000000000010A /* URLTransactionParser.swift */; };
+		1A000001000000000000000B /* DataPortability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A000001000000000000010B /* DataPortability.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		1A0000010000000000000108 /* StatisticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatisticsView.swift; sourceTree = "<group>"; };
 		1A0000010000000000000109 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		1A000001000000000000010A /* URLTransactionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLTransactionParser.swift; sourceTree = "<group>"; };
+		1A000001000000000000010B /* DataPortability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPortability.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,7 @@
 			children = (
 				1A0000010000000000000103 /* TransactionStore.swift */,
 				1A000001000000000000010A /* URLTransactionParser.swift */,
+				1A000001000000000000010B /* DataPortability.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -190,6 +193,7 @@
 				1A0000010000000000000008 /* StatisticsView.swift in Sources */,
 				1A0000010000000000000009 /* SettingsView.swift in Sources */,
 				1A000001000000000000000A /* URLTransactionParser.swift in Sources */,
+				1A000001000000000000000B /* DataPortability.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,7 +321,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aramco.cycomm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -339,7 +343,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.0;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aramco.cycomm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

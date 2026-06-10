@@ -2,11 +2,14 @@
 
 这是从 Expo / React Native 迁移出来的纯 SwiftUI 版本。
 
+当前版本：`1.1.0`
+
 ## 技术栈
 
 - SwiftUI
 - SwiftData 本地持久化
 - Charts 原生图表
+- SwiftUI 文件导入 / 导出
 - iOS URL Scheme：`moneytracker://add`
 - iOS 26 Liquid Glass：使用系统 `glassEffect`，低版本回退到 `ultraThinMaterial`
 
@@ -39,4 +42,12 @@ moneytracker://add?amount=28.5&merchant=星巴克&type=expense&payment=微信&no
 
 ## 迁移说明
 
-这个原生版本不再依赖 Metro、Expo Go、二维码扫码和 JavaScript 运行时。数据使用 SwiftData 存在 App 沙盒内，和旧 Expo SQLite 数据库不是同一个文件；后续如果需要迁移旧数据，建议从旧版导出 JSON，再给原生版补一个 JSON 导入入口。
+这个原生版本不再依赖 Metro、Expo Go、二维码扫码和 JavaScript 运行时。数据使用 SwiftData 存在 App 沙盒内，和旧 Expo SQLite 数据库不是同一个文件。
+
+旧数据迁移流程：
+
+1. 在旧 Expo 版中导出 MoneyTracker JSON。
+2. 打开原生版 `设置 -> 数据迁移 -> 导入 JSON`。
+3. 选择旧版导出的 JSON 文件。
+
+导入时会按交易 ID 自动跳过重复记录。原生版也可以在 `设置 -> 数据迁移 -> 导出 JSON` 导出同格式备份，便于跨设备迁移。

@@ -1,11 +1,16 @@
 import SwiftData
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var transactions: [Transaction]
 
     @State private var showClearAlert = false
+    @State private var isImportingJSON = false
+    @State private var isExportingJSON = false
+    @State private var exportDocument = MoneyTrackerJSONDocument(text: "{}")
+    @State private var operationMessage: String?
 
     private var monthCount: Int {
         Set(transactions.map { Calendar.current.startOfMonth(for: $0.transactionDate) }).count
@@ -19,6 +24,7 @@ struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         statsCard
+                        dataSection
                         shortcutSection
                         dangerSection
                         aboutSection
@@ -40,7 +46,34 @@ struct SettingsView: View {
             } message: {
                 Text("此操作会永久删除所有交易记录。建议先保留一份设备备份。")
             }
+            .fileImporter(
+                isPresented: $isImportingJSON,
+                allowedContentTypes: [.json],
+                allowsMultipleSelection: false,
+                onCompletion: handleImportResult
+            )
+            .fileExporter(
+                isPresented: $isExportingJSON,
+                document: exportDocument,
+                contentType: .json,
+                defaultFilename: DataPortability.defaultExportFilename(),
+                onCompletion: handleExportResult
+            )
+            .alert("数据操作结果", isPresented: operationAlertBinding) {
+                Button("好", role: .cancel) {
+                    operationMessage = nil
+                }
+            } message: {
+                Text(operationMessage ?? "")
+            }
         }
+    }
+
+    private var operationAlertBinding: Binding<Bool> {
+        Binding(
+            get: { operationMessage != nil },
+            set: { if !$0 { operationMessage = nil } }
+        )
     }
 
     private var statsCard: some View {
@@ -50,6 +83,39 @@ struct SettingsView: View {
             SettingStat(title: "有记录月份", value: "\(monthCount)")
         }
         .liquidGlassCard(cornerRadius: 28)
+    }
+
+    private var dataSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            sectionTitle("数据迁移")
+
+            VStack(spacing: 0) {
+                Button {
+                    prepareExport()
+                } label: {
+                    SettingsRow(
+                        icon: "square.and.arrow.up",
+                        title: "导出 JSON",
+                        subtitle: "生成兼容 Expo 旧版的 MoneyTracker 备份"
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Divider().padding(.leading, 44)
+
+                Button {
+                    isImportingJSON = true
+                } label: {
+                    SettingsRow(
+                        icon: "square.and.arrow.down",
+                        title: "导入 JSON",
+                        subtitle: "从旧版导出的 JSON 恢复账单，并自动跳过重复记录"
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            .liquidGlassCard(cornerRadius: 24)
+        }
     }
 
     private var shortcutSection: some View {
@@ -108,7 +174,7 @@ struct SettingsView: View {
             VStack(spacing: 0) {
                 AboutRow(title: "应用名称", value: "MoneyTracker")
                 Divider()
-                AboutRow(title: "版本", value: "1.0.0")
+                AboutRow(title: "版本", value: "1.1.0")
                 Divider()
                 AboutRow(title: "技术栈", value: "SwiftUI + SwiftData")
                 Divider()
@@ -123,6 +189,54 @@ struct SettingsView: View {
             .font(.footnote.weight(.semibold))
             .foregroundStyle(.secondary)
             .padding(.horizontal, 4)
+    }
+
+    private func prepareExport() {
+        do {
+            exportDocument = MoneyTrackerJSONDocument(text: try DataPortability.exportJSON(from: transactions))
+            isExportingJSON = true
+        } catch {
+            operationMessage = "导出失败：\(error.localizedDescription)"
+        }
+    }
+
+    private func handleExportResult(_ result: Result<URL, Error>) {
+        switch result {
+        case .success:
+            operationMessage = "导出完成。"
+        case let .failure(error):
+            operationMessage = "导出失败：\(error.localizedDescription)"
+        }
+    }
+
+    private func handleImportResult(_ result: Result<[URL], Error>) {
+        switch result {
+        case let .success(urls):
+            guard let url = urls.first else {
+                operationMessage = "导入失败：没有选择文件。"
+                return
+            }
+            importJSON(from: url)
+        case let .failure(error):
+            operationMessage = "导入失败：\(error.localizedDescription)"
+        }
+    }
+
+    private func importJSON(from url: URL) {
+        let canAccess = url.startAccessingSecurityScopedResource()
+        defer {
+            if canAccess {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        do {
+            let text = try String(contentsOf: url, encoding: .utf8)
+            let summary = try DataPortability.importJSON(text, into: modelContext, existing: transactions)
+            operationMessage = summary.message
+        } catch {
+            operationMessage = "导入失败：\(error.localizedDescription)"
+        }
     }
 }
 
